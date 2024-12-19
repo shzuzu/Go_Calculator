@@ -1,6 +1,6 @@
-# Go_Calculator
+# #UNDER DEVELOPMENT Go_Calculator
 
-Этот репозиторий калькулятора на Golang, аналог (eval() в JS или в PY)
+This is a Golang calculator repository, similar to eval() in JS or PY
 
 This is an end, fren..
 
