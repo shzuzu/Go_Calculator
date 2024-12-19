@@ -77,14 +77,14 @@ func CalcHandler(w http.ResponseWriter, r *http.Request) {
 	request := new(Request)
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodPost {
-		http.Error(w, "can`t complete that method", http.StatusMethodNotAllowed)
+		http.Error(w, "Can`t complete that method", http.StatusMethodNotAllowed)
 		return
 	}
 	defer r.Body.Close()
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "", http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
 		return
 	}
@@ -92,11 +92,11 @@ func CalcHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := calc.Calc(request.Expression)
 	if err != nil {
 		if err == calc.ErrInvalidExpression {
-			http.Error(w, "Unprocessable Entity", http.StatusUnprocessableEntity)
+			http.Error(w, "", http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(Error{Error: "Expression is not valid"})
 			return
 		} else {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "", http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
 			return
 		}
