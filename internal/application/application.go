@@ -54,7 +54,7 @@ func (a *Application) Run() error {
 		//вычисляем выражение
 		result, err := calc.Calc(text)
 		if err != nil {
-			log.Println(text, "<-- you`ve entered \nCalculation failed with error: ", err)
+			log.Println(text, "<-- you've entered \nCalculation failed with error: ", err)
 		} else {
 			log.Println(text, "=", result)
 		}
