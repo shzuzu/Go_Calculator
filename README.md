@@ -1,6 +1,7 @@
 # 🧮 Simple Go Calculator
 
-Welcome to the **Simple Go Calculator** repository! This project provides a straightforward calculator implementation in Go, allowing you to perform basic arithmetic operations either in a **console mode** or via a **server mode**. Choose the mode that best suits your needs!
+Welcome to the **Simple Go Calculator** repository! This project provides a straightforward calculator implementation in Go, allowing you to perform basic arithmetic operations either in a **console mode** or via a **server mode**. Choose the mode that best suits your needs! \
+[доступно на русском](./docs/READMERUS.md)
 
 🚀 **Features**
 
@@ -10,7 +11,7 @@ Welcome to the **Simple Go Calculator** repository! This project provides a stra
 Supports basic arithmetic operations: `+`, `-`, `*`, `/`.
 Easy to use and extend.
 
-📦 **Installation**
+📦 **Installation**\
 To get started, make sure you have Go installed on your machine. You can download it from [here](https://golang.org/dl/).
 
 Clone the repository:
