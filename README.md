@@ -3,7 +3,7 @@
 Welcome to the **Simple Go Calculator** repository! This project provides a straightforward calculator implementation in Go, allowing you to perform basic arithmetic operations either in a **console mode** or via a **server mode**. Choose the mode that best suits your needs! \
 [доступно на русском](./docs/READMERUS.md)
 
-🚀 **Features**
+### 🚀 **Features**
 
 **Console Mode**: Run the calculator directly in your terminal for quick calculations.
 
@@ -11,7 +11,8 @@ Welcome to the **Simple Go Calculator** repository! This project provides a stra
 Supports basic arithmetic operations: `+`, `-`, `*`, `/`.
 Easy to use and extend.
 
-📦 **Installation**\
+### 📦 **Installation**
+
 To get started, make sure you have Go installed on your machine. You can download it from [here](https://golang.org/dl/).
 
 Clone the repository:
@@ -21,7 +22,7 @@ git clone https://github.com/shzuzu/Go_Calculator.git
 cd Go_Calculator
 ```
 
-🛠️ **Usage**
+### 🛠️ **Usage**
 
 1. **Console Mode**
    Run the calculator in your terminal for interactive calculations:
@@ -65,7 +66,8 @@ Send a POST request with your expression to `/api/v1/calculate`:
 }
 ```
 
-🧪 **Testing**\
+### 🧪 **Testing**
+
 The project includes unit tests to ensure the calculator works as expected. Run the tests using:
 
 ```bash
@@ -73,10 +75,12 @@ go test ./internal/application
 go test ./pkg/calc
 ```
 
-📜 **License**\
+### 📜 **License**
+
 This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
 
-💬 **Feedback**\
+### 💬 **Feedback**
+
 If you have any questions, suggestions, or issues, feel free to open an issue or reach out to me directly.
 
 **Happy calculating!** 🎉
