@@ -15,7 +15,7 @@ func Calc(expression string) (float64, error) {
 		return 0, ErrEOF
 	}
 	if err != nil {
-		return 0, err
+		return 0, ErrInvalidExpression
 	}
 	return evalNode(node)
 }
