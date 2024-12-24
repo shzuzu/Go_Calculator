@@ -91,14 +91,26 @@ func CalcHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := calc.Calc(request.Expression)
 	if err != nil {
-		if err == calc.ErrInvalidExpression {
+		switch err {
+		case calc.ErrInvalidExpression:
 			http.Error(w, "", http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(Error{Error: "Expression is not valid"})
 			return
-		} else {
+		case calc.ErrDivisionByZero:
+			http.Error(w, "", http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(Error{Error: "Division by zero"})
+			return
+
+		case calc.ErrEOF:
+			http.Error(w, "", http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(Error{Error: "You shold enter an expression"})
+			return
+
+		default:
 			http.Error(w, "", http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
 			return
+
 		}
 	}
 	json.NewEncoder(w).Encode(Result{Result: result})
