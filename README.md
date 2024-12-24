@@ -66,6 +66,63 @@ Send a POST request with your expression to `/api/v1/calculate`:
 }
 ```
 
+### 🚨 **Error Handling**
+
+The server handles various error scenarios gracefully and returns appropriate HTTP status codes and messages. Below are the details of the errors you might encounter:
+
+**❌422 Unprocessable Entity**
+
+This error occurs when the provided expression is syntactically correct but cannot be processed.
+
+**Example equest:**
+
+```bash
+curl --location 'localhost:8080/api/v1/calculate' \
+--header 'Content-Type: application/json' \
+--data '{
+  "expression": "31313da / 0"
+}'
+```
+
+**Example responce:**
+
+```json
+{
+  "error": "Cannot divide by zero"
+}
+```
+
+**❌500 Internal Server Error**
+
+This error occurs when there is an unexpected issue on the server side, such as a bug in the code or an unhandled exception.
+
+Example Response:
+
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+**❌405 Method Not Allowed**
+
+This error occurs when an unsupported HTTP method is used for a route. For example, using GET instead of POST for the `/api/v1/calculate` endpoint.
+
+**Example Request:**
+
+```bash
+curl -X GET http://localhost:8080/calculate -d '{"expression": "2 + 2"}'
+
+```
+
+**Example Response:**
+
+```json
+{
+  "error": "Method not allowed"
+}
+```
+
 ### 🧪 **Testing**
 
 The project includes unit tests to ensure the calculator works as expected. Run the tests using:
