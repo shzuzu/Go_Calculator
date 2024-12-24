@@ -32,6 +32,11 @@ func TestCals(t *testing.T) {
 			expression:     "1/2",
 			expectedResult: 0.5,
 		},
+		{
+			name:           "below 0 and unar expression",
+			expression:     "1 / -(2 + 3)",
+			expectedResult: -0.2,
+		},
 	}
 	for _, tc := range testSucces {
 		t.Run(tc.name, func(t *testing.T) {

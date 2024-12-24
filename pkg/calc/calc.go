@@ -1,6 +1,7 @@
 package calc
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -9,8 +10,12 @@ import (
 
 func Calc(expression string) (float64, error) {
 	node, err := parser.ParseExpr(expression)
+	if expression == "" {
+		fmt.Println("\nYou shold enter an expression")
+		return 0, ErrEOF
+	}
 	if err != nil {
-		return 0, ErrInvalidExpression
+		return 0, err
 	}
 	return evalNode(node)
 }
@@ -20,11 +25,11 @@ func evalNode(node ast.Node) (float64, error) {
 	case *ast.BinaryExpr:
 		left, err := evalNode(n.X)
 		if err != nil {
-			return 0, err
+			return 0, ErrInvalidExpression
 		}
 		right, err := evalNode(n.Y)
 		if err != nil {
-			return 0, err
+			return 0, ErrInvalidExpression
 		}
 
 		switch n.Op {
@@ -52,6 +57,21 @@ func evalNode(node ast.Node) (float64, error) {
 	case *ast.ParenExpr:
 		// Вычисляем выражение внутри скобок
 		return evalNode(n.X)
+
+	case *ast.UnaryExpr:
+		// учет унарных операторов
+		value, err := evalNode(n.X)
+		if err != nil {
+			return 0, ErrInvalidExpression
+		}
+		switch n.Op {
+		case token.SUB:
+			return -value, nil
+		case token.ADD:
+			return value, nil
+		default:
+			return 0, ErrInvalidExpression
+		}
 
 	default:
 		return 0, ErrInvalidExpression
