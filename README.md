@@ -40,6 +40,16 @@ Input expression (enter "exit" to exit):
 2+2*2 = 6
 ```
 
+```mermaid
+graph TD
+    U[User] -->|POST /calculate| O[Оркестратор]
+    U -->|GET /expressions| O
+    O -->|GET /internal/task| A1[Агент 1]
+    O -->|GET /internal/task| A2[Агент 2]
+    A1 -->|POST /internal/task| O
+    A2 -->|POST /internal/task| O
+```
+
 2. **Server Mode**
    Start the calculator as an HTTP server to handle calculations via API:
 

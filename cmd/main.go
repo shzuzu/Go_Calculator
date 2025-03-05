@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/shzuzu/Go_Calculator/internal/application"
 )
@@ -36,5 +37,26 @@ func main() {
 	default:
 		fmt.Println("Unknown mode. Use --mode=console or --mode=server")
 		os.Exit(1)
+	}
+}
+
+func createEnv() {
+	envPath := filepath.Join("..", ".env")
+
+	file, err := os.Create(envPath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	envVars :=
+		`TIME_ADDITION_MS=0
+		TIME_SUBTRACTION_MS=0
+		TIME_MULTIPLICATION_MS=0
+		TIME_DIVISION_MS=0
+	`
+	_, err = file.WriteString(envVars)
+	if err != nil {
+		panic(err)
 	}
 }
