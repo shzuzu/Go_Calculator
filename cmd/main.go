@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/shzuzu/Go_Calculator/internal/application"
 )
@@ -18,8 +18,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	createEnv()
 	app := application.New()
-
 	switch *mode {
 	case "":
 		fmt.Println("Please choose the mode, use --mode=console or --mode=server")
@@ -41,22 +41,20 @@ func main() {
 }
 
 func createEnv() {
-	envPath := filepath.Join("..", ".env")
-
-	file, err := os.Create(envPath)
-	if err != nil {
-		panic(err)
+	if _, err := os.Stat(".env"); err == nil {
+		fmt.Println(".env file already exists")
+		return
 	}
-	defer file.Close()
-
 	envVars :=
-		`TIME_ADDITION_MS=0
-		TIME_SUBTRACTION_MS=0
-		TIME_MULTIPLICATION_MS=0
-		TIME_DIVISION_MS=0
+		`
+	TIME_ADDITION_MS=0
+	TIME_SUBTRACTION_MS=0
+	TIME_MULTIPLICATION_MS=0
+	TIME_DIVISION_MS=0
 	`
-	_, err = file.WriteString(envVars)
+	d1 := []byte(envVars)
+	err := os.WriteFile(".env", d1, 0644)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error writing file: %v", err)
 	}
 }

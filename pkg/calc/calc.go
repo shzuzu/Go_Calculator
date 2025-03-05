@@ -94,7 +94,7 @@ func Calc(expression string) (float64, error) {
 func evalNode(node ast.Node) (float64, error) {
 	err := godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file in calc")
 	}
 	switch n := node.(type) {
 	case *ast.BinaryExpr:
