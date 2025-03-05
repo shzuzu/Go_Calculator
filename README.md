@@ -11,6 +11,20 @@ Welcome to the **Simple Go Calculator** repository! This project provides a stra
 Supports basic arithmetic operations: `+`, `-`, `*`, `/`.
 Easy to use and extend.
 
+### 🧱 Architecture
+
+```mermaid
+graph TD
+    U[User] -->|POST /calculate| O[Orchestrator]
+    U -->|GET /expressions| O
+    O -->|GET /internal/task| A1[Agent 1]
+    O -->|GET /internal/task| A2[Agent 2]
+    O -->|GET /internal/task| A3[Agent 3]
+    A1 -->|POST /internal/task| O
+    A2 -->|POST /internal/task| O
+    A3 -->|POST /internal/task| O
+```
+
 ### 📦 **Installation**
 
 To get started, make sure you have Go installed on your machine. You can download it from [here](https://golang.org/dl/).
@@ -38,20 +52,6 @@ Enter your arithmetic expressions directly in the terminal.
 Input expression (enter "exit" to exit):
 2+2*2
 2+2*2 = 6
-```
-
-### 🧱 Architecture
-
-```mermaid
-graph TD
-    U[User] -->|POST /calculate| O[Orchestrator]
-    U -->|GET /expressions| O
-    O -->|GET /internal/task| A1[Agent 1]
-    O -->|GET /internal/task| A2[Agent 2]
-    O -->|GET /internal/task| A3[Agent 3]
-    A1 -->|POST /internal/task| O
-    A2 -->|POST /internal/task| O
-    A3 -->|POST /internal/task| O
 ```
 
 2. **Server Mode**
@@ -155,6 +155,9 @@ curl --location 'localhost:8080/api/v1/calculate' \
 }
 ```
 
+##
+
+\
 **Example request 2:**
 
 ```bash
