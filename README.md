@@ -38,6 +38,8 @@ cd Go_Calculator
 
 ### 🛠️ **Usage**
 
+#### This creates a .env file with environment variables
+
 1. **Console Mode**
    Run the calculator in your terminal for interactive calculations:
 
