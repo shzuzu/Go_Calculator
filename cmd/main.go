@@ -47,6 +47,7 @@ func createEnv() {
 	}
 	envVars :=
 		`
+	PORT=0
 	TIME_ADDITION_MS=0
 	TIME_SUBTRACTION_MS=0
 	TIME_MULTIPLICATION_MS=0
