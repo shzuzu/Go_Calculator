@@ -40,6 +40,8 @@ Input expression (enter "exit" to exit):
 2+2*2 = 6
 ```
 
+### 🧱 Architecture
+
 ```mermaid
 graph TD
     U[User] -->|POST /calculate| O[Orchestrator]
@@ -70,11 +72,60 @@ Send a POST request with your expression to `/api/v1/calculate`:
 }'
 ```
 
-**Example response:**
+**Example response 1:**
 
 ```json
 {
+  "id": 1
+}
+```
+
+**Example request 2 `/extensions/{id}`:**
+
+```bash
+curl localhost:8080/api/v1/expressions/1
+```
+
+**Example response 2:**
+
+```json
+{
+  "id": "1",
+  "status": "done",
   "result": 6
+}
+```
+
+- Several requests
+
+```bash
+ curl --location 'localhost:8080/api/v1/calculate' \
+--header 'Content-Type: application/json' \
+--data '{
+  "expression": "2+2*1"
+}'
+```
+
+```bash
+curl localhost:8080/api/v1/expressions/
+```
+
+- Responce:
+
+```json
+{
+  "expressions": [
+    {
+      "id": "1",
+      "status": "done",
+      "result": 6
+    },
+    {
+      "id": "2",
+      "status": "done",
+      "result": 4
+    }
+  ]
 }
 ```
 
@@ -86,21 +137,37 @@ The server handles various error scenarios gracefully and returns appropriate HT
 
 This error occurs when the provided expression is syntactically correct but cannot be processed.
 
-**Example equest:**
+**Example request 1:**
 
 ```bash
 curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
 --data '{
-  "expression": "31313da / 0"
+  "expression": "313 / 0"
 }'
 ```
 
-**Example responce:**
+**Example responce 1:**
 
 ```json
 {
-  "error": "Cannot divide by zero"
+  "error": "Division by zero"
+}
+```
+
+**Example request 2:**
+
+```bash
+curl localhost:8080/api/v1/expressions/1
+```
+
+**Example responce 2:**
+
+```json
+{
+  "id": "1",
+  "status": "error",
+  "result": null
 }
 ```
 
