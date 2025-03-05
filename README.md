@@ -42,12 +42,14 @@ Input expression (enter "exit" to exit):
 
 ```mermaid
 graph TD
-    U[User] -->|POST /calculate| O[Оркестратор]
+    U[User] -->|POST /calculate| O[Orchestrator]
     U -->|GET /expressions| O
-    O -->|GET /internal/task| A1[Агент 1]
-    O -->|GET /internal/task| A2[Агент 2]
+    O -->|GET /internal/task| A1[Agent 1]
+    O -->|GET /internal/task| A2[Agent 2]
+    O -->|GET /internal/task| A3[Agent 3]
     A1 -->|POST /internal/task| O
     A2 -->|POST /internal/task| O
+    A3 -->|POST /internal/task| O
 ```
 
 2. **Server Mode**
