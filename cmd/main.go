@@ -52,6 +52,7 @@ func createEnv() {
 	TIME_SUBTRACTION_MS=0
 	TIME_MULTIPLICATION_MS=0
 	TIME_DIVISION_MS=0
+	COMPUTING_POWER=3
 	`
 	d1 := []byte(envVars)
 	err := os.WriteFile(".env", d1, 0644)

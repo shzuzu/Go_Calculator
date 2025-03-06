@@ -13,7 +13,7 @@ import (
 )
 
 func TestCreateExpressionHandler(t *testing.T) {
-	orchestrator := application.NewOrchestrator()
+	orchestrator := application.NewOrchestrator(4)
 
 	tt := []struct {
 		name           string
@@ -63,7 +63,7 @@ func TestCreateExpressionHandler(t *testing.T) {
 }
 
 func TestGetExpressionsHandler(t *testing.T) {
-	orchestrator := application.NewOrchestrator()
+	orchestrator := application.NewOrchestrator(4)
 	orchestrator.Exprs = []application.Expression{
 		{Id: "1", Status: "done", Result: func() *float64 { f := 6.0; return &f }()},
 		{Id: "2", Status: "pending", Result: nil},
@@ -85,7 +85,7 @@ func TestGetExpressionsHandler(t *testing.T) {
 }
 
 func TestExpressionFromID(t *testing.T) {
-	orchestrator := application.NewOrchestrator()
+	orchestrator := application.NewOrchestrator(4)
 	orchestrator.Exprs = []application.Expression{
 		{Id: "1", Status: "done", Result: func() *float64 { f := 10.0; return &f }()},
 		{Id: "2", Status: "pending", Result: nil},
@@ -136,7 +136,7 @@ func TestExpressionFromID(t *testing.T) {
 }
 
 func TestExpressionFromID_InternalServerError(t *testing.T) {
-	orchestrator := application.NewOrchestrator()
+	orchestrator := application.NewOrchestrator(4)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/expressions/1", nil)
 	req.SetPathValue("id", "1")

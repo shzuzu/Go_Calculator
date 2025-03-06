@@ -98,15 +98,19 @@ type Error struct {
 	Error string `json:"error"`
 }
 type Orchestrator struct {
-	mu    sync.Mutex
-	Exprs []Expression
-	ID    int
+	mu         sync.Mutex
+	Exprs      []Expression
+	ID         int
+	WorkerPool *calc.WorkerPool
 }
 
-func NewOrchestrator() *Orchestrator {
+func NewOrchestrator(numWorkers int) *Orchestrator {
+	pool := calc.NewWorkerPool(numWorkers)
+	pool.Start() // Запускаем WorkerPool
 	return &Orchestrator{
-		Exprs: make([]Expression, 0),
-		ID:    0,
+		ID:         0,
+		Exprs:      make([]Expression, 0),
+		WorkerPool: pool,
 	}
 }
 
@@ -127,10 +131,12 @@ func (o *Orchestrator) ExpressionFromID(w http.ResponseWriter, r *http.Request) 
 }
 
 func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("CreateExpressionHandler: started")
 	request := &Request{}
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != http.MethodPost {
+		log.Println("CreateExpressionHandler: method not allowed")
 		http.Error(w, "Can't complete that method", http.StatusMethodNotAllowed)
 		return
 	}
@@ -138,48 +144,52 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
+		log.Printf("CreateExpressionHandler: error decoding request: %v", err)
 		http.Error(w, "", http.StatusUnprocessableEntity)
 		json.NewEncoder(w).Encode(Error{Error: "Unprocessable Entity"})
 		return
 	}
 
+	log.Printf("CreateExpressionHandler: received expression: %s", request.Expression)
+
 	o.mu.Lock()
 	o.ID += 1
 	id := strconv.Itoa(o.ID)
 	o.mu.Unlock()
+
 	expr := Expression{
 		Id:     id,
 		Status: "pending",
 		Result: nil,
 	}
+
 	o.mu.Lock()
 	o.Exprs = append(o.Exprs, expr)
 	o.mu.Unlock()
 
-	errChan := make(chan error, 1)
-	go func() {
-		result, err := calc.Calc(request.Expression)
+	log.Printf("CreateExpressionHandler: submitted expression to worker pool: %s", request.Expression)
+	o.WorkerPool.Submit(request.Expression)
+	result := o.WorkerPool.GetResult()
+	log.Printf("CreateExpressionHandler: received result from worker pool: %v, error: %v", result.Value, result.Err)
 
-		// Обновляем статус и результат выражения
-		o.mu.Lock()
-		defer o.mu.Unlock()
-		for i, e := range o.Exprs {
-			if e.Id == id {
-				if err != nil {
-					o.Exprs[i].Status = "error"
-					o.Exprs[i].Result = nil
-					errChan <- err
-				} else {
-					o.Exprs[i].Status = "done"
-					o.Exprs[i].Result = &result
-					errChan <- nil
-				}
-				break
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	for i, e := range o.Exprs {
+		if e.Id == id {
+			if result.Err != nil {
+				o.Exprs[i].Status = "error"
+				o.Exprs[i].Result = nil
+			} else {
+				o.Exprs[i].Status = "done"
+				o.Exprs[i].Result = &result.Value
 			}
+			break
 		}
-	}()
-	if err := <-errChan; err != nil {
-		switch err {
+	}
+
+	if result.Err != nil {
+		log.Printf("CreateExpressionHandler: error evaluating expression: %v", result.Err)
+		switch result.Err {
 		case calc.ErrInvalidExpression:
 			http.Error(w, "", http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(Error{Error: "Expression is not valid"})
@@ -198,9 +208,10 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 	}
+
+	log.Printf("CreateExpressionHandler: successfully processed expression: %s", request.Expression)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(Id{Id: id})
-
 }
 
 func (o *Orchestrator) GetExpressionsHandler(w http.ResponseWriter, r *http.Request) {
@@ -214,7 +225,12 @@ func (o *Orchestrator) GetExpressionsHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (a *Application) RunServer() error {
-	orchestrator := NewOrchestrator()
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Failed load .env in RunServer")
+	}
+	power, _ := strconv.Atoi(os.Getenv("COMPUTING_POWER"))
+	orchestrator := NewOrchestrator(power)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/calculate", orchestrator.CreateExpressionHandler)
