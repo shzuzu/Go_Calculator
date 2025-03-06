@@ -6,6 +6,8 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -104,9 +106,14 @@ func Calc(expression string) (float64, error) {
 }
 
 func evalNode(node ast.Node) (float64, error) {
-	err := godotenv.Load("../.env")
+	// Формируем абсолютный путь к .env
+	_, filename, _, _ := runtime.Caller(0)
+	dir := filepath.Dir(filename)
+	envPath := filepath.Join(dir, "../../.env")
+
+	err := godotenv.Load(envPath)
 	if err != nil {
-		log.Fatal("Error loading .env file in calc")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 	switch n := node.(type) {
 	case *ast.BinaryExpr:
