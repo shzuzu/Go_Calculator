@@ -12,11 +12,11 @@
 
 ```mermaid
 graph TD
-    U[Юзер] -->|POST /calculate| O[Оркестратор]
+    U[Юзер] -->|POST /calculate| O(Оркестратор)
     U -->|GET /expressions| O
-    O -->|GET /internal/task| A1[Агент 1]
-    O -->|GET /internal/task| A2[Агент 2]
-    O -->|GET /internal/task| A3[Агент 3]
+    O -->|GET /internal/task| A1([Агент 1])
+    O -->|GET /internal/task| A2([Агент 2])
+    O -->|GET /internal/task| A3([Агент 3])
     A1 -->|POST /internal/task| O
     A2 -->|POST /internal/task| O
     A3 -->|POST /internal/task| O
