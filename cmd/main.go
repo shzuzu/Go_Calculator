@@ -42,12 +42,12 @@ func main() {
 
 func createEnv() {
 	if _, err := os.Stat(".env"); err == nil {
-		fmt.Println(".env file already exists")
+		fmt.Println("It's OK! .env file already exists")
 		return
 	}
 	envVars :=
 		`
-	PORT=0
+	PORT=8080
 	TIME_ADDITION_MS=0
 	TIME_SUBTRACTION_MS=0
 	TIME_MULTIPLICATION_MS=0
