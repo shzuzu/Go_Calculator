@@ -115,14 +115,14 @@ func evalNode(node ast.Node) (float64, error) {
 
 			return left + right, nil
 		case token.SUB:
-			ta, _ := strconv.Atoi(os.Getenv("TIME_SUBTRACTION_MS"))
-			sleepTime := time.Millisecond * time.Duration(ta)
+			ts, _ := strconv.Atoi(os.Getenv("TIME_SUBTRACTION_MS"))
+			sleepTime := time.Millisecond * time.Duration(ts)
 			time.Sleep(sleepTime)
 
 			return left - right, nil
 		case token.MUL:
-			ta, _ := strconv.Atoi(os.Getenv("TIME_MULTIPLICATIONS_MS"))
-			sleepTime := time.Millisecond * time.Duration(ta)
+			tm, _ := strconv.Atoi(os.Getenv("TIME_MULTIPLICATIONS_MS"))
+			sleepTime := time.Millisecond * time.Duration(tm)
 			time.Sleep(sleepTime)
 
 			return left * right, nil
@@ -130,8 +130,8 @@ func evalNode(node ast.Node) (float64, error) {
 			if right == 0 {
 				return 0, ErrDivisionByZero
 			}
-			ta, _ := strconv.Atoi(os.Getenv("TIME_DIVISIONS_MS"))
-			sleepTime := time.Millisecond * time.Duration(ta)
+			td, _ := strconv.Atoi(os.Getenv("TIME_DIVISIONS_MS"))
+			sleepTime := time.Millisecond * time.Duration(td)
 			time.Sleep(sleepTime)
 
 			return left / right, nil
