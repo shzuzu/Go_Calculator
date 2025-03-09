@@ -47,6 +47,9 @@ cd Go_Calculator
 go run ./cmd/main.go --mode=console
 ```
 
+**Install dependencies:**
+`go mod tidy`
+
 Enter your arithmetic expressions directly in the terminal.
 **Example:**
 
