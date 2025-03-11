@@ -35,6 +35,8 @@ Clone the repository:
 git clone https://github.com/shzuzu/Go_Calculator.git
 cd Go_Calculator
 ```
+**Install dependencies:**
+`go mod tidy`
 
 ### 🛠️ **Usage**
 
@@ -47,8 +49,6 @@ cd Go_Calculator
 go run ./cmd/main.go --mode=console
 ```
 
-**Install dependencies:**
-`go mod tidy`
 
 Enter your arithmetic expressions directly in the terminal.
 **Example:**
