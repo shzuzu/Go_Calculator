@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -103,6 +104,82 @@ func Calc(expression string) (float64, error) {
 		return 0, ErrInvalidExpression
 	}
 	return evalNode(node)
+}
+func (wp *WorkerPool) ValidateExpression(expression string) error {
+	if strings.TrimSpace(expression) == "" {
+		return ErrEOF
+	}
+
+	expr, err := parser.ParseExpr(expression)
+	if err != nil {
+		return ErrInvalidExpression
+	}
+
+	return validateNode(expr)
+}
+
+func validateNode(node ast.Node) error {
+	switch n := node.(type) {
+	case *ast.BinaryExpr:
+		err := validateNode(n.X)
+		if err != nil {
+			return err
+		}
+
+		err = validateNode(n.Y)
+		if err != nil {
+			return err
+		}
+
+		if n.Op == token.QUO {
+			if right, ok := n.Y.(*ast.BasicLit); ok {
+				if right.Kind == token.INT || right.Kind == token.FLOAT {
+					value, err := strconv.ParseFloat(right.Value, 64)
+					if err == nil && value == 0 {
+						return ErrDivisionByZero
+					}
+				}
+			}
+		}
+
+		switch n.Op {
+		case token.ADD, token.SUB, token.MUL, token.QUO:
+			return nil
+		default:
+			return ErrInvalidExpression
+		}
+
+	case *ast.BasicLit:
+		if n.Kind != token.FLOAT && n.Kind != token.INT {
+			return ErrInvalidExpression
+		}
+
+		_, err := strconv.ParseFloat(n.Value, 64)
+		if err != nil {
+			return ErrInvalidExpression
+		}
+
+	case *ast.ParenExpr:
+		return validateNode(n.X)
+
+	case *ast.UnaryExpr:
+		err := validateNode(n.X)
+		if err != nil {
+			return err
+		}
+
+		switch n.Op {
+		case token.SUB, token.ADD:
+			return nil
+		default:
+			return ErrInvalidExpression
+		}
+
+	default:
+		return ErrInvalidExpression
+	}
+
+	return nil
 }
 
 func evalNode(node ast.Node) (float64, error) {
