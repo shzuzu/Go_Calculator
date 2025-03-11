@@ -35,6 +35,7 @@ Clone the repository:
 git clone https://github.com/shzuzu/Go_Calculator.git
 cd Go_Calculator
 ```
+
 **Install dependencies:**
 `go mod tidy`
 
@@ -48,7 +49,6 @@ cd Go_Calculator
 ```bash
 go run ./cmd/main.go --mode=console
 ```
-
 
 Enter your arithmetic expressions directly in the terminal.
 **Example:**
@@ -112,7 +112,7 @@ curl localhost:8080/api/v1/expressions/1
 ```
 
 ```bash
-curl localhost:8080/api/v1/expressions/
+curl localhost:8080/api/v1/expressions
 ```
 
 - Responce:
