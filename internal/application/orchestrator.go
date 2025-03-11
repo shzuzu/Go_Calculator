@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -225,10 +227,15 @@ func (o *Orchestrator) GetExpressionsHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (a *Application) RunServer() error {
-	err := godotenv.Load("../.env")
+	_, filename, _, _ := runtime.Caller(0)
+	dir := filepath.Dir(filename)
+	envPath := filepath.Join(dir, "../../.env")
+
+	err := godotenv.Load(envPath)
 	if err != nil {
-		log.Fatalf("Failed load .env in RunServer")
+		log.Fatalf("Error loading .env file in RunServer: %v", err)
 	}
+
 	power, _ := strconv.Atoi(os.Getenv("COMPUTING_POWER"))
 	orchestrator := NewOrchestrator(power)
 
