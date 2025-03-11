@@ -61,7 +61,7 @@ Input expression (enter "exit" to exit): 2+2*2
 go run ./cmd/main.go --mode=server
 ```
 
-Сервер запустится по адресу `http://localhost:8080\`. Отправьте POST-запрос с вашим выражением на `/api/v1/calculate`:
+Сервер запустится по адресу `http://localhost:8080/`. Отправьте POST-запрос с вашим выражением на `/api/v1/calculate`:
 
 ```bash
 curl --location 'localhost:8080/api/v1/calculate'
@@ -106,7 +106,7 @@ curl localhost:8080/api/v1/expressions/1
 ```
 
 ```bash
-curl localhost:8080/api/v1/expressions/
+curl localhost:8080/api/v1/expressions
 ```
 
 - Ответ:

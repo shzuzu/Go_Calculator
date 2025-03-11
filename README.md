@@ -66,7 +66,7 @@ Input expression (enter "exit" to exit):
 go run ./cmd/main.go --mode=server
 ```
 
-The server will start on `http://localhost:8080\`.
+The server will start on `http://localhost:8080/`.
 Send a POST request with your expression to `/api/v1/calculate`:
 
 ```bash
