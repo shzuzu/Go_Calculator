@@ -169,29 +169,36 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 	o.Exprs = append(o.Exprs, expr)
 	o.mu.Unlock()
 
-	log.Printf("CreateExpressionHandler: submitted expression to worker pool: %s", request.Expression)
-	o.WorkerPool.Submit(request.Expression)
-	result := o.WorkerPool.GetResult()
-	log.Printf("CreateExpressionHandler: received result from worker pool: %v, error: %v", result.Value, result.Err)
+	errChan := make(chan error, 1)
+	go func() {
+		o.WorkerPool.Submit(request.Expression)
+		log.Printf("CreateExpressionHandler: submitted expression to worker pool: %s", request.Expression)
+		result := o.WorkerPool.GetResult()
 
-	o.mu.Lock()
-	defer o.mu.Unlock()
-	for i, e := range o.Exprs {
-		if e.Id == id {
-			if result.Err != nil {
-				o.Exprs[i].Status = "error"
-				o.Exprs[i].Result = nil
-			} else {
-				o.Exprs[i].Status = "done"
-				o.Exprs[i].Result = &result.Value
+		errChan <- result.Err
+		log.Printf("CreateExpressionHandler: received result from worker pool: %v, error: %v", result.Value, result.Err)
+
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		for i, e := range o.Exprs {
+			if e.Id == id {
+				if result.Err != nil {
+					o.Exprs[i].Status = "error"
+					o.Exprs[i].Result = nil
+				} else {
+					o.Exprs[i].Status = "done"
+					o.Exprs[i].Result = &result.Value
+				}
+				break
 			}
-			break
 		}
-	}
 
-	if result.Err != nil {
-		log.Printf("CreateExpressionHandler: error evaluating expression: %v", result.Err)
-		switch result.Err {
+		log.Printf("CreateExpressionHandler: successfully processed expression: %s", request.Expression)
+	}()
+	err = <-errChan
+	if err != nil {
+		log.Printf("CreateExpressionHandler: error evaluating expression: %v", err)
+		switch err {
 		case calc.ErrInvalidExpression:
 			http.Error(w, "", http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(Error{Error: "Expression is not valid"})
@@ -210,8 +217,6 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-
-	log.Printf("CreateExpressionHandler: successfully processed expression: %s", request.Expression)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(Id{Id: id})
 }
