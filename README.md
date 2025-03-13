@@ -85,7 +85,7 @@ Send a POST request with your expression to `/api/v1/calculate`:
 }
 ```
 
-**Example request 2 `/extensions/{id}`:**
+**Example request 2 `/expressions/{id}`:**
 
 ```bash
 curl localhost:8080/api/v1/expressions/1
