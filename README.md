@@ -253,10 +253,12 @@ Invalid Token
 
 ### 🧪 **Testing**
 
-The project includes unit tests to ensure the calculator works as expected. Run the tests using:
+The project includes unit and integration tests to verify that the calculator works correctly. \
+ Run the tests using:
 
 ```bash
-go test ./internal/application
+go test ./internal/auth
+go test ./internal/database/repo
 go test ./pkg/calc
 ```
 
