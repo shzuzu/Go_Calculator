@@ -25,7 +25,7 @@ func main() {
 
 	_, filename, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(filename)
-	envPath := filepath.Join(dir, "../../.env")
+	envPath := filepath.Join(dir, "../.env")
 	createEnv(envPath)
 
 	err := godotenv.Load(envPath)
@@ -88,6 +88,7 @@ func createEnv(envPath string) {
 	TIME_DIVISION_MS=0
 	COMPUTING_POWER=3
 	GRPC_SERVER_ADDRESS=localhost:50051
+	JWT_SECRET=golang
 	`
 	d1 := []byte(envVars)
 	err := os.WriteFile(envPath, d1, 0644)
