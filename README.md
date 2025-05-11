@@ -66,14 +66,42 @@ Input expression (enter "exit" to exit):
 go run ./cmd/main.go --mode=server
 ```
 
-The server will start on `http://localhost:8080/`.
-Send a POST request with your expression to `/api/v1/calculate`:
+- **Register:**
 
 ```bash
- curl --location 'localhost:8080/api/v1/calculate' \
+curl --location 'localhost:8080/api/v1/register' \
 --header 'Content-Type: application/json' \
 --data '{
-  "expression": "2+2*2"
+  "login": "john doe", "password": "gofer228"
+}'
+
+```
+
+- **Log in:**
+
+```bash
+curl --location 'localhost:8080/api/v1/login' \
+--header 'Content-Type: application/json' \
+--data '{
+  "login": "john doe", "password": "gofer228"
+}'
+```
+
+- Response (JWT for authorization):
+
+```json
+{ "token": "{your-token}" }
+```
+
+The server will start on `http://localhost:8080/`.\
+Send a POST request with your expression and auth header to `/api/v1/calculate`:
+
+```bash
+curl --location 'localhost:8080/api/v1/calculate' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
+--data '{
+  "expression": "2+2"
 }'
 ```
 
@@ -85,10 +113,10 @@ Send a POST request with your expression to `/api/v1/calculate`:
 }
 ```
 
-**Example request 2 `/expressions/{id}`:**
+**Example request with auth header `/expressions/{id}`:**
 
 ```bash
-curl localhost:8080/api/v1/expressions/1
+curl --header 'Authorization: Bearer {your-token}' localhost:8080/api/v1/expressions/1
 ```
 
 **Example response 2:**
@@ -96,42 +124,47 @@ curl localhost:8080/api/v1/expressions/1
 ```json
 {
   "id": "1",
+  "user_id": 1,
+  "expression": "2+2",
   "status": "done",
-  "result": 6
+  "result": 4
 }
 ```
 
-- Several requests
+- More requests
 
 ```bash
  curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
 --data '{
-  "expression": "2+2*1"
+  "expression": "2+2*2"
 }'
 ```
 
 ```bash
-curl localhost:8080/api/v1/expressions
+curl  --header 'Authorization: Bearer {your-token}' localhost:8080/api/v1/expressions
 ```
 
 - Responce:
 
 ```json
-{
-  "expressions": [
-    {
-      "id": "1",
-      "status": "done",
-      "result": 6
-    },
-    {
-      "id": "2",
-      "status": "done",
-      "result": 4
-    }
-  ]
-}
+[
+  {
+    "id": "1",
+    "user_id": 1,
+    "expression": "2+2",
+    "status": "done",
+    "result": 4
+  },
+  {
+    "id": "2",
+    "user_id": 1,
+    "expression": "2+2*2",
+    "status": "done",
+    "result": 6
+  }
+]
 ```
 
 ### 🚨 **Error Handling**
@@ -147,8 +180,9 @@ This error occurs when the provided expression is syntactically correct but cann
 ```bash
 curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
 --data '{
-  "expression": "313 / 0"
+  "expression": "0 / 0"
 }'
 ```
 
@@ -191,7 +225,7 @@ Example Response:
 }
 ```
 
-**❌405 Method Not Allowed**
+**❌405 Method not allowed**
 
 This error occurs when an unsupported HTTP method is used for a route. For example, using GET instead of POST for the `/api/v1/calculate` endpoint.
 
@@ -208,6 +242,13 @@ curl -X GET http://localhost:8080/calculate -d '{"expression": "2 + 2"}'
 {
   "error": "Method not allowed"
 }
+```
+
+**❌401 Unauthtorized** \
+This error occurs when you use invalid JWT
+
+```bash
+Invalid Token
 ```
 
 ### 🧪 **Testing**

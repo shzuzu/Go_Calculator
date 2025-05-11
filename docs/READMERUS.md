@@ -61,12 +61,43 @@ Input expression (enter "exit" to exit): 2+2*2
 go run ./cmd/main.go --mode=server
 ```
 
-Сервер запустится по адресу `http://localhost:8080/`. Отправьте POST-запрос с вашим выражением на `/api/v1/calculate`:
+- **Регистрация:**
 
 ```bash
-curl --location 'localhost:8080/api/v1/calculate'
---header 'Content-Type: application/json'
---data '{ "expression": "2+2*2" }'
+curl --location 'localhost:8080/api/v1/register' \
+--header 'Content-Type: application/json' \
+--data '{
+  "login": "иванов иван", "password": "гофер228"
+}'
+
+```
+
+- **Вход:**
+
+```bash
+curl --location 'localhost:8080/api/v1/login' \
+--header 'Content-Type: application/json' \
+--data '{
+  "login": "иванов иван", "password": "гофер228"
+}'
+```
+
+- Запрос (JWT для авторизации):
+
+```json
+{ "token": "{your-token}" }
+```
+
+Сервер запуститься на `http://localhost:8080/`.\
+Отправьте POST запрос с вашим expression и header с JWT `/api/v1/calculate`:
+
+```bash
+curl --location 'localhost:8080/api/v1/calculate' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
+--data '{
+  "expression": "2+2"
+}'
 ```
 
 **Пример ответа 1:**
@@ -77,10 +108,10 @@ curl --location 'localhost:8080/api/v1/calculate'
 }
 ```
 
-**Пример запроса 2 `/extensions/{id}`:**
+**Пример запроса с JWT `/extensions/{id}`:**
 
 ```bash
-curl localhost:8080/api/v1/expressions/1
+curl --header 'Authorization: Bearer {your-token}' localhost:8080/api/v1/expressions/1
 ```
 
 **Пример ответа 2:**
@@ -88,44 +119,49 @@ curl localhost:8080/api/v1/expressions/1
 ```json
 {
   "id": "1",
+  "user_id": 1,
+  "expression": "2+2",
   "status": "done",
-  "result": 6
+  "result": 4
 }
 ```
 
 ##
 
-- Несколько запросов
+- Больше запросов
 
 ```bash
  curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
 --data '{
-  "expression": "2+2*1"
+  "expression": "2+2*2"
 }'
 ```
 
 ```bash
-curl localhost:8080/api/v1/expressions
+curl  --header 'Authorization: Bearer {your-token}' localhost:8080/api/v1/expressions
 ```
 
 - Ответ:
 
 ```json
-{
-  "expressions": [
-    {
-      "id": "1",
-      "status": "done",
-      "result": 6
-    },
-    {
-      "id": "2",
-      "status": "done",
-      "result": 4
-    }
-  ]
-}
+[
+  {
+    "id": "1",
+    "user_id": 1,
+    "expression": "2+2",
+    "status": "done",
+    "result": 4
+  },
+  {
+    "id": "2",
+    "user_id": 1,
+    "expression": "2+2*2",
+    "status": "done",
+    "result": 6
+  }
+]
 ```
 
 ### 🚨 **Обработка ошибок**
@@ -139,10 +175,11 @@ curl localhost:8080/api/v1/expressions
 **Пример запроса 1:**
 
 ```bash
-curl --location 'localhost:8080/api/v1/calculate'
---header 'Content-Type: application/json'
+curl --location 'localhost:8080/api/v1/calculate' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {your-token}' \
 --data '{
-"expression": "313 / 0"
+  "expression": "0 / 0"
 }'
 ```
 
@@ -200,6 +237,13 @@ curl -X GET http://localhost:8080/calculate -d '{"expression": "2 + 2"}'
 {
   "error": "Method not allowed"
 }
+```
+
+**❌401 Unauthtorized** \
+Эта ошибка возникает когда вы отправляете запрос с неверным JWT
+
+```bash
+Invalid Token
 ```
 
 ### 🧪 **Тестирование**

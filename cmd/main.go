@@ -56,16 +56,17 @@ func main() {
 		defer grpcClient.Close()
 
 		app := application.New(db, grpcClient)
+		go func() {
+			fmt.Println("Starting gRPC calculator server...")
+			err := calcGrpc.StartServer(":50051")
+			if err != nil {
+				log.Fatalf("Failed to start gRPC server: %v", err)
+			}
+		}()
 		err = app.RunServer()
 		if err != nil {
 			fmt.Println("Error via starting the server:", err)
 			os.Exit(1)
-		}
-	case "calc-server":
-		fmt.Println("Starting gRPC calculator server...")
-		err := calcGrpc.StartServer(":50051")
-		if err != nil {
-			log.Fatalf("Failed to start gRPC server: %v", err)
 		}
 	default:
 		fmt.Println("Unknown mode. Use --mode=console, --mode=server, or --mode=calc-server")
