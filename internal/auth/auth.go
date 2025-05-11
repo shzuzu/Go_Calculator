@@ -29,7 +29,7 @@ type Claims struct {
 func NewAuthService(db *sql.DB) *AuthService {
 	return &AuthService{
 		db:        db,
-		jwtSecret: os.Getenv("JWT_SECRET"), // Читаем секрет из окружения
+		jwtSecret: os.Getenv("JWT_SECRET"),
 	}
 }
 
@@ -39,7 +39,7 @@ func (s *AuthService) RegisterUser(login, password string) error {
 	if err != nil {
 		return err
 	}
-	if count > 0 { // Исправлено с count > 1
+	if count > 0 {
 		return ErrUserAlreadyExists
 	}
 
@@ -75,7 +75,7 @@ func (s *AuthService) LoginUser(login, password string) (string, error) {
 			Subject:   strconv.FormatInt(user.ID, 10),
 			ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(now),
-			NotBefore: jwt.NewNumericDate(now), // Убрали задержку в 5 секунд
+			NotBefore: jwt.NewNumericDate(now),
 		},
 	}
 

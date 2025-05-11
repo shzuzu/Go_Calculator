@@ -23,7 +23,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load environment variables
 	_, filename, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(filename)
 	envPath := filepath.Join(dir, "../../.env")
@@ -34,7 +33,6 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Initialize database
 	db, err := database.InitDB("./calculator.db")
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -51,7 +49,6 @@ func main() {
 		app.Run()
 	case "server":
 		fmt.Println("Starting HTTP-server...")
-		// Start gRPC client
 		grpcClient, err := calcGrpc.NewCalculatorClient("localhost:50051")
 		if err != nil {
 			log.Fatalf("Failed to create gRPC client: %v", err)

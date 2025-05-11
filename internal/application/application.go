@@ -64,8 +64,7 @@ func (a *Application) Run() error {
 			log.Println("Application was successfully closed!")
 			return nil
 		}
-
-		// In console mode, we calculate directly without using gRPC
+		//в консольном режиме обойдемся без grpc
 		result, err := calc.Calc(text)
 		if err != nil {
 			log.Println(text, "<-- you've entered \nCalculation failed with error: ", err)
