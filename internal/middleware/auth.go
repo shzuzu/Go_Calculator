@@ -35,7 +35,7 @@ func AuthMiddleware(authService *auth.AuthService) func(http.Handler) http.Handl
 			token := tokenParts[1]
 			userID, err := authService.ValidateToken(token)
 			if err != nil {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
+				http.Error(w, "Invalid token middleware", http.StatusUnauthorized)
 				return
 			}
 

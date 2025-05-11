@@ -2,6 +2,8 @@ package auth
 
 import (
 	"database/sql"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,40 +15,41 @@ type User struct {
 	Login    string `json:"login"`
 	Password string `json:"-"`
 }
+
 type AuthService struct {
-	db *sql.DB
+	db        *sql.DB
+	jwtSecret string
 }
+
 type Claims struct {
 	ID int64 `json:"id"`
-	jwt.MapClaims
+	jwt.RegisteredClaims
 }
 
 func NewAuthService(db *sql.DB) *AuthService {
-	return &AuthService{db: db}
+	return &AuthService{
+		db:        db,
+		jwtSecret: os.Getenv("JWT_SECRET"), // Читаем секрет из окружения
+	}
 }
 
 func (s *AuthService) RegisterUser(login, password string) error {
 	var count int
 	err := s.db.QueryRow("SELECT COUNT(*) FROM users WHERE login = ?", login).Scan(&count)
-
 	if err != nil {
 		return err
 	}
-	if count > 1 {
+	if count > 0 { // Исправлено с count > 1
 		return ErrUserAlreadyExists
 	}
 
-	password_hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	_, err = s.db.Exec("INSERT INTO users (login, password) VALUES(?, ?)", login, password_hash)
-
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = s.db.Exec("INSERT INTO users (login, password) VALUES(?, ?)", login, passwordHash)
+	return err
 }
 
 func (s *AuthService) LoginUser(login, password string) (string, error) {
@@ -58,48 +61,35 @@ func (s *AuthService) LoginUser(login, password string) (string, error) {
 			return "", ErrInvalidCreds
 		}
 		return "", err
-
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return "", ErrInvalidCreds
-		}
-		return "", err
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", ErrInvalidCreds
 	}
 
 	now := time.Now()
 	claims := &Claims{
 		ID: user.ID,
-		MapClaims: jwt.MapClaims{
-			"name": user.ID,
-			"nbf":  now.Add(5 * time.Second).Unix(),
-			"exp":  now.Add(24 * time.Hour).Unix(),
-			"iat":  now.Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "calculator-api",
+			Subject:   strconv.FormatInt(user.ID, 10),
+			ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now), // Убрали задержку в 5 секунд
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte("secret-from-env"))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
-
+	return token.SignedString([]byte(s.jwtSecret))
 }
 
 func (s *AuthService) ValidateToken(tokenString string) (int64, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return "secret-from-env", nil
+		return []byte(s.jwtSecret), nil
 	})
 
-	if err != nil {
-		return 0, err
-	}
-
-	if !token.Valid {
+	if err != nil || !token.Valid {
 		return 0, ErrInvalidToken
 	}
 
