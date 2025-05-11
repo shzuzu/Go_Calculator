@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "github.com/shzuzu/Go_Calculator/pkg/api";
+
+service CalculatorService {
+  rpc Calculate(CalculateRequest) returns (CalculateResponse) {}
+  rpc ValidateExpression(ValidateRequest) returns (ValidateResponse) {}
+}
+
+message CalculateRequest {
+  string expression = 1;
+}
+
+message CalculateResponse {
+  double result = 1;
+  string error = 2;
+}
+
+message ValidateRequest {
+  string expression = 1;
+}
+
+message ValidateResponse {
+  bool is_valid = 1;
+  string error = 2;
+}
