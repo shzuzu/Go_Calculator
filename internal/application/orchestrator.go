@@ -81,7 +81,7 @@ func (o *Orchestrator) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Error(w, "", http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
+		json.NewEncoder(w).Encode(Error{Error: "Internal server error register"})
 		return
 	}
 
@@ -118,14 +118,33 @@ func (o *Orchestrator) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Error(w, "", http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
+		json.NewEncoder(w).Encode(Error{Error: "Internal server error login"})
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(Token{Token: token})
 }
+func (o *Orchestrator) GetExpressionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	expressions, err := o.expressionRepo.GetByUserID(userID)
+	if err != nil {
+		http.Error(w, "Internal server error expression", http.StatusInternalServerError)
+		return
+	}
+	if err := json.NewEncoder(w).Encode(expressions); err != nil {
+		http.Error(w, "Something went wrong..", http.StatusInternalServerError)
+		return
+	}
+
+}
 func (o *Orchestrator) ExpressionFromID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -144,7 +163,7 @@ func (o *Orchestrator) ExpressionFromID(w http.ResponseWriter, r *http.Request) 
 
 	expr, err := o.expressionRepo.GetByID(id)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, "Internal server error expression by id", http.StatusInternalServerError)
 		return
 	}
 
@@ -187,7 +206,6 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 
 	log.Printf("CreateExpressionHandler: received expression: %s", request.Expression)
 
-	// Validate expression using gRPC client
 	if err := o.calculatorClient.ValidateExpression(request.Expression); err != nil {
 		log.Printf("CreateExpressionHandler: error validating expression: %v", err)
 		switch err {
@@ -205,24 +223,22 @@ func (o *Orchestrator) CreateExpressionHandler(w http.ResponseWriter, r *http.Re
 			return
 		default:
 			http.Error(w, "", http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
+			json.NewEncoder(w).Encode(Error{Error: "Internal server error validate"})
 			return
 		}
 	}
 
-	// Create expression in database
 	id, err := o.expressionRepo.Create(userID, request.Expression)
 	if err != nil {
 		log.Printf("CreateExpressionHandler: error creating expression: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(Error{Error: "Internal server error"})
+		json.NewEncoder(w).Encode(Error{Error: "Internal server error db"})
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(Id{Id: strconv.FormatInt(id, 10)})
 
-	// Calculate expression asynchronously
 	go func() {
 		log.Printf("CreateExpressionHandler: calculating expression: %s", request.Expression)
 		result, err := o.calculatorClient.Calculate(request.Expression)

@@ -51,7 +51,6 @@ func New(db *sql.DB, calculatorClient *calcGrpc.CalculatorClient) *Application {
 }
 
 func (a *Application) Run() error {
-	// Use direct calculation in console mode
 	for {
 		fmt.Println(`Input expression (enter "exit" to exit):`)
 		reader := bufio.NewReader(os.Stdin)
@@ -88,7 +87,7 @@ func (a *Application) RunServer() error {
 
 	protectedMux := http.NewServeMux()
 	protectedMux.HandleFunc("/api/v1/calculate", orchestrator.CreateExpressionHandler)
-	// protectedMux.HandleFunc("/api/v1/expressions", orchestrator.GetExpressionsHandler)
+	protectedMux.HandleFunc("/api/v1/expressions", orchestrator.GetExpressionsHandler)
 	protectedMux.HandleFunc("/api/v1/expressions/{id}", orchestrator.ExpressionFromID)
 
 	authMiddleware := middleware.AuthMiddleware(authService)

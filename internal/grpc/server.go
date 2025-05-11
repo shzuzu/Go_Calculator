@@ -32,7 +32,7 @@ func (s *CalculatorServer) Calculate(ctx context.Context, req *pb.CalculateReque
 func (s *CalculatorServer) ValidateExpression(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
 	log.Printf("Received validation request: %s", req.Expression)
 
-	wp := calc.NewWorkerPool(1) // Create a temporary worker pool for validation
+	wp := calc.NewWorkerPool(1)
 	err := wp.ValidateExpression(req.Expression)
 
 	response := &pb.ValidateResponse{
